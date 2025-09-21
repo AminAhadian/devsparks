@@ -10,6 +10,15 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+/**
+ * Register a new user
+ *
+ * Creates a new user account with the provided credentials and returns an API token.
+ * Required fields: name, email, username, password (with confirmation).
+ *
+ * @param Request $request Contains user registration data
+ * @return JsonResponse Returns authentication token and user data with HTTP 201 status
+ */
     public function register(Request $request): JsonResponse
     {
         $data = $request->validate([
@@ -30,6 +39,17 @@ class AuthController extends Controller
 
         return response()->json(['token' => $token, 'user' => $user], 201);
     }
+
+/**
+ * Authenticate user
+ *
+ * Logs in an existing user using either email or username with password.
+ * Returns an API token for authenticated requests.
+ *
+ * @param Request $request Contains login credentials (email or username + password)
+ * @return JsonResponse Returns authentication token and user data
+ * @throws ValidationException If credentials are invalid
+ */
     public function login(Request $request): JsonResponse
     {
         $request->validate([
@@ -51,6 +71,15 @@ class AuthController extends Controller
         return response()->json(['token' => $token, 'user' => $user]);
     }
 
+/**
+ * Logout user
+ *
+ * Revokes the current authentication token, effectively logging out the user.
+ * Requires a valid authentication token in the request header.
+ *
+ * @param Request $request Contains authenticated user information
+ * @return JsonResponse Returns success message with HTTP 200 status
+ */
     public function logout(Request $request): JsonResponse
     {
         // revoke current token:
@@ -58,8 +87,16 @@ class AuthController extends Controller
         return response()->json(['message' => 'Logged out'], 200);
     }
 
-    // optional: route to get current user
-    public function me(Request $request)
+/**
+ * Get current user profile
+ *
+ * Returns the profile information of the currently authenticated user.
+ * Requires a valid authentication token in the request header.
+ *
+ * @param Request $request Contains authenticated user information
+ * @return JsonResponse Returns current user data
+ */
+    public function me(Request $request): JsonResponse
     {
         return response()->json($request->user());
     }
