@@ -53,14 +53,22 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse
     {
         $request->validate([
+            'identity' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) {
+                    if (! filter_var($value, FILTER_VALIDATE_EMAIL) && ! preg_match('/^[A-Za-z0-9_]{3,20}$/', $value)) {
+                        $fail('The ' . $attribute . ' must be a valid email or username.');
+                    }
+                },
+            ],
             'password' => 'required',
-            'email'    => 'required_without:username|email',
-            'username' => 'required_without:email|string',
         ]);
-
-        $user = User::where('email', $request->email)
-            ->orWhere('username', $request->username)
-            ->first();
+        
+        $identity = $request->identity;
+        $user     = filter_var($identity, FILTER_VALIDATE_EMAIL)
+            ? User::where('email', $identity)->first()
+            : User::where('username', $identity)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages(['credentials' => ['The provided credentials are incorrect.']]);
