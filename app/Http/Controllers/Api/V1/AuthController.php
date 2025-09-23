@@ -24,7 +24,7 @@ class AuthController extends Controller
         $data = $request->validate([
             'name'     => 'required|max:255',
             'email'    => 'required|email|unique:users',
-            'username' => 'required|string|unique:users',
+            'username' => 'required|min:3|max:20|regex:/^[A-Za-z0-9_]{3,20}$/|string|unique:users',
             'password' => 'required|min:8|confirmed',
         ]);
 
@@ -64,7 +64,7 @@ class AuthController extends Controller
             ],
             'password' => 'required',
         ]);
-        
+
         $identity = $request->identity;
         $user     = filter_var($identity, FILTER_VALIDATE_EMAIL)
             ? User::where('email', $identity)->first()
